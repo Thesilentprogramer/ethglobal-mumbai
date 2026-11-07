@@ -3,15 +3,52 @@ services:
     name: arena-mumbai
     runtime: node
     plan: free
+    region: oregon
     buildCommand: bun install --frozen-lockfile && bun run --filter @arena/web build
     startCommand: cd apps/web && bun run start
     healthCheckPath: /api/leaderboard
     envVars:
       - key: BUN_VERSION
         value: 1.4.4
+      - key: DATABASE_URL
+        fromDatabase:
+          name: arena-mumbai-db
+          property: connectionString
+      - key: DB_POOL_MAX
+        value: 2
+      - key: SESSION_SECRET
+        generateValue: true
       - key: EXECUTION_MODE
         value: paper
       - key: NEXT_PUBLIC_CHAIN
         value: base
       - key: NEXT_PUBLIC_BASE_EXPLORER
         value: https://basescan.org
+  - type: worker
+    name: arena-mumbai-worker
+    runtime: node
+    plan: 0.5c-512mb
+    region: oregon
+    buildCommand: bun install --frozen-lockfile
+    startCommand: bun run --filter @arena/worker start
+    envVars:
+      - key: BUN_VERSION
+        value: 1.4.4
+      - key: DATABASE_URL
+        fromDatabase:
+          name: arena-mumbai-db
+          property: connectionString
+      - key: DB_POOL_MAX
+        value: 2
+      - key: EXECUTION_MODE
+        value: paper
+      - key: NETWORK
+        value: mainnet
+      - key: CHAIN
+        value: base
+
+databases:
+  - name: arena-mumbai-db
+    plan: 0.1c-256mb
+    diskSizeGB: 1
+    region: oregon
