@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: arena-mumbai
+    runtime: node
+    plan: free
+    buildCommand: bun install --frozen-lockfile && bun run --filter @arena/web build
+    startCommand: cd apps/web && bun run start
+    healthCheckPath: /api/leaderboard
+    envVars:
+      - key: BUN_VERSION
+        value: 1.4.4
+      - key: EXECUTION_MODE
+        value: paper
+      - key: NEXT_PUBLIC_CHAIN
+        value: base
+      - key: NEXT_PUBLIC_BASE_EXPLORER
+        value: https://basescan.org
